@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>产业链投资跟踪门户 v5</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#0f0e0c;color:#f0ede6;min-height:100vh;padding:0 0 40px;}
+.ticker-bar{background:#1a1a18;padding:6px 0;overflow:hidden;border-bottom:1px solid #222;}
+.ticker-inner{display:flex;animation:sl 120s linear infinite;white-space:nowrap;}
+.ticker-inner:hover{animation-play-state:paused;}
+.ticker-item{padding:0 22px;font-size:11px;border-right:1px solid #333;display:inline-flex;align-items:center;gap:5px;}
+.t-up{color:#4ade80;}.t-dn{color:#f87171;}.t-neu{color:#888;}
+@keyframes sl{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 14px 10px;}
+.hero{text-align:center;margin-bottom:22px;}
+.hero h1{font-size:22px;font-weight:700;margin-bottom:3px;}
+.hero .sub{font-size:12px;color:#888;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:22px;}
+.card{background:#1a1a18;border:1px solid #2a2a28;border-radius:12px;padding:16px 18px;text-decoration:none;color:inherit;transition:all .15s;display:block;border-left:4px solid;}
+.card:hover{transform:translateY(-3px);background:#1f1f1d;}
+.c-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.c-ic{font-size:28px;}.c-nm{font-size:15px;font-weight:700;}.c-st{font-size:10px;color:#888;margin-top:1px;}
+.c-money{font-size:20px;font-weight:700;margin:6px 0 3px;}
+.c-lbl{font-size:10px;color:#666;}
+.c-stats{display:flex;gap:10px;font-size:11px;color:#aaa;margin-top:6px;flex-wrap:wrap;}
+.c-stats b{color:#f0ede6;font-weight:600;}
+.section{background:#1a1a18;border:1px solid #2a2a28;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.section h2{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;}
+.pie-row{display:flex;flex-direction:column;gap:14px;}
+.pie-wrap{position:relative;height:220px;max-width:300px;margin:0 auto;}
+.ind-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;}
+.ind-stat{align-self:start;}
+.ind-stat{background:#222220;border-radius:7px;padding:10px 13px;border-left:3px solid;}
+.ind-stat .nm{font-size:12px;font-weight:700;margin-bottom:2px;}
+.ind-stat .amt{font-size:16px;font-weight:700;}
+.ind-stat .sub{font-size:10px;color:#888;margin-top:2px;}
+.ind-top10{margin-top:8px;border-top:1px solid #2a2a28;padding-top:6px;}
+.ind-top-row{display:grid;grid-template-columns:14px 50px 1fr auto;gap:5px;align-items:center;padding:3px 0;font-size:10px;border-bottom:1px solid #1f1f1d;}
+.ind-top-row:last-child{border-bottom:none;}
+.ind-top-row .rk{color:#444;}
+.ind-top-row .tk{font-weight:700;color:#f0ede6;cursor:pointer;text-decoration:none;}
+.ind-top-row .tk:hover{color:#4ade80;text-decoration:underline;}
+.ind-top-row .am{color:#888;}
+.ind-top-row .pc{font-weight:700;text-align:right;}
+.ind-top-h{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-weight:600;}
+.heat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px;}
+.heat-item{background:#222220;border-radius:6px;padding:8px 10px;border-left:3px solid;}
+.heat-nm{font-size:10px;font-weight:600;margin-bottom:3px;}
+.heat-amt{font-size:13px;font-weight:700;}
+.heat-sub{font-size:10px;margin-top:2px;}
+.h-up{color:#4ade80;}.h-dn{color:#f87171;}.h-neu{color:#888;}
+.cross-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;}
+.cross-card{background:#1a1a18;border:1px solid #2a2a28;border-radius:10px;padding:12px 14px;}
+.cross-card h3{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.cross-list{display:flex;flex-direction:column;gap:3px;}
+.cross-item{display:grid;grid-template-columns:16px 55px 1fr auto;gap:5px;align-items:center;padding:4px 0;font-size:10px;border-bottom:1px solid #222;}
+.cross-item:last-child{border-bottom:none;}
+.c-rank{color:#444;}.c-tkr{font-weight:700;color:#f0ede6;}.c-ind{color:#666;}.c-pct{font-weight:700;}
+.footer{font-size:10px;color:#333;text-align:center;margin-top:16px;line-height:1.8;}
+.footer code{background:#1a1a18;padding:1px 5px;border-radius:3px;font-family:Menlo,monospace;font-size:10px;}
+</style>
+</head>
+<body>
+<div class="ticker-bar"><div class="ticker-inner" id="tickerInner"></div></div>
+<div class="wrap">
+<div class="hero"><h1>📊 产业链投资跟踪门户</h1><div class="sub" id="updSub">数据源: Yahoo Finance · 工作日09:30自动更新</div></div>
+<div class="cards" id="cardsArea"></div>
+<div class="section">
+  <h2>🔄 行业资金活跃度对比 (近5日成交额)</h2>
+  <div class="pie-row">
+    <div class="pie-wrap"><canvas id="pieChart"></canvas></div>
+    <div class="ind-stats" id="indStats"></div>
+  </div>
+</div>
+<div class="section">
+  <h2>🌡️ 跨行业板块资金热度 TOP12</h2>
+  <div class="heat-grid" id="heatGrid"></div>
+</div>
+<div class="cross-row">
+  <div class="cross-card"><h3>🚀 今日涨幅 TOP10 (跨行业)</h3><div class="cross-list" id="cross1dGain"></div></div>
+  <div class="cross-card"><h3>📉 今日跌幅 TOP10 (跨行业)</h3><div class="cross-list" id="cross1dLoss"></div></div>
+  <div class="cross-card"><h3>💰 资金活跃 TOP10 (跨行业)</h3><div class="cross-list" id="crossMoney"></div></div>
+  <div class="cross-card"><h3>⚡ 成交量异动 (量比≥2x)</h3><div class="cross-list" id="crossAnomaly"></div></div>
+</div>
+<div class="footer">添加股票：编辑 <code>stocks_config.py</code> 加一行 · 更新：运行 <code>run.sh</code><br>最近更新：<span id="updTime">—</span></div>
+</div>
+<script>
+const PORTAL_DATA = {"updated_at": "2026-05-02 14:07:29", "industries": {"ai": {"name": "AI产业链", "icon": "🤖", "color": "#185fa5", "output": "ai.html", "stock_count": 230, "sector_count": 8, "total_r5d_dollar": 1803808274320, "total_r22d_dollar": 6921504919681, "top10_gainers_1d": [["ATOM", 35.57], ["TEAM", 29.58], ["WOLF", 24.48], ["TWLO", 23.83], ["BAND", 21.87], ["AXTI", 21.18], ["SOUN", 20.1], ["LWLG", 18.59], ["MRAM", 17.56], ["RDDT", 13.07]], "top10_losers_1d": [["CMBM", -50.0], ["ATKR", -4.62], ["BLDR", -4.26], ["COHU", -3.72], ["GLW", -3.64], ["APH", -3.37], ["PH", -2.99], ["OKLO", -2.9], ["CAMT", -2.76], ["RMBS", -2.76]], "top10_gainers_5d": [["BAND", 86.0, 369536566], ["SIMO", 52.8, 2024304594], ["MRAM", 52.7, 395663228], ["ATOM", 29.0, 173885148], ["LWLG", 28.4, 590502518], ["MXL", 28.0, 3317424990], ["MYRG", 27.8, 690849792], ["TWLO", 27.5, 3017309618], ["EXTR", 26.7, 434848446], ["AXTI", 26.1, 4955138308]], "money_top10": [["NVDA", 175263102751, -4.7], ["TSLA", 106293836594, 3.9], ["MU", 103714784441, 9.2], ["MSFT", 84330334405, -2.4], ["SNDK", 84001246025, 19.9], ["AMZN", 82108848506, 1.6], ["INTC", 80816833399, 20.7], ["AAPL", 77339163224, 3.3], ["META", 73777533536, -9.8], ["AMD", 73146683365, 3.7]], "anomalies": [["BAND", 5.26, 21.87], ["OLED", 3.87, 10.68], ["MRAM", 3.48, 17.56], ["VEEV", 3.22, 10.02], ["RDDT", 3.18, 13.07]], "sectors_brief": [{"key": "chip", "name": "算力芯片", "icon": "🔵", "color": "#185fa5", "stock_count": 56, "avg_chg_1d": 3.08, "avg_chg_5d": 4.3, "wow": 14.7, "r5d_dollar": 553414306942}, {"key": "optical", "name": "光互联/光模块", "icon": "🌿", "color": "#0f6e56", "stock_count": 22, "avg_chg_1d": 2.08, "avg_chg_5d": 7.38, "wow": -0.5, "r5d_dollar": 106840326299}, {"key": "datacenter", "name": "数据中心基础设施", "icon": "🏭", "color": "#3b6d11", "stock_count": 35, "avg_chg_1d": 0.26, "avg_chg_5d": 1.45, "wow": 9.3, "r5d_dollar": 119840335921}, {"key": "memory", "name": "内存/存储", "icon": "🟡", "color": "#ba7517", "stock_count": 10, "avg_chg_1d": 4.48, "avg_chg_5d": 12.81, "wow": 41.8, "r5d_dollar": 239935867003}, {"key": "equipment", "name": "芯片制造设备", "icon": "🔧", "color": "#5f5e5a", "stock_count": 19, "avg_chg_1d": 0.02, "avg_chg_5d": -6.32, "wow": 16.8, "r5d_dollar": 68430025200}, {"key": "ai_power", "name": "AI电力/能源", "icon": "⚡", "color": "#639922", "stock_count": 34, "avg_chg_1d": -0.74, "avg_chg_5d": 0.44, "wow": 3.5, "r5d_dollar": 72940625384}, {"key": "cloud", "name": "云/应用平台", "icon": "🔷", "color": "#3c3489", "stock_count": 68, "avg_chg_1d": 4.93, "avg_chg_5d": 4.38, "wow": 12.1, "r5d_dollar": 699929995135}, {"key": "ai_warning", "name": "AI泡沫预警区", "icon": "⚠️", "color": "#a32d2d", "stock_count": 16, "avg_chg_1d": 7.19, "avg_chg_5d": 9.41, "wow": -26.1, "r5d_dollar": 61255738303}]}, "space": {"name": "航天产业链", "icon": "🚀", "color": "#1a1a2e", "output": "space.html", "stock_count": 68, "sector_count": 10, "total_r5d_dollar": 119711714480, "total_r22d_dollar": 601434485586, "top10_gainers_1d": [["BAND", 21.87], ["SATL", 11.15], ["DTSS", 4.44], ["BBAI", 4.02], ["EH", 4.0], ["PLTR", 3.57], ["CODA", 2.74], ["MTLS", 2.55], ["ACHR", 2.26], ["SPIR", 1.96]], "top10_losers_1d": [["AVAV", -5.15], ["RKLB", -4.48], ["RCAT", -4.18], ["ASTS", -4.07], ["DDD", -3.66], ["LHX", -2.24], ["NOC", -1.96], ["HXL", -1.75], ["KTOS", -1.59], ["MNTS", -1.51]], "top10_gainers_5d": [["BAND", 86.0, 369536566], ["SATL", 16.4, 180409488], ["BBAI", 11.9, 910659653], ["ASGN", 11.6, 279638938], ["GD", 10.4, 3547748396], ["SPIR", 10.1, 88909082], ["JOBY", 8.8, 1651212910], ["MTLS", 8.1, 2061573], ["TXT", 7.7, 944184222], ["VVX", 7.0, 131471224]], "money_top10": [["PLTR", 21862783388, 0.7], ["GE", 9989928916, 0.7], ["TMUS", 7235787037, 3.3], ["VZ", 7080391650, 3.7], ["RKLB", 6830998580, -1.1], ["BA", 5227995158, -2.2], ["ASTS", 5038701762, -7.2], ["RTX", 4950004900, -0.2], ["LMT", 4197066653, -0.1], ["T", 4187173056, -0.3]], "anomalies": [["BAND", 5.26, 21.87], ["PRLB", 2.87, 0.56]], "sectors_brief": [{"key": "launch", "name": "运载火箭/发射", "icon": "🚀", "color": "#e63946", "stock_count": 10, "avg_chg_1d": -0.19, "avg_chg_5d": -1.39, "wow": -34.3, "r5d_dollar": 25408024729}, {"key": "satellite_mfg", "name": "卫星制造", "icon": "🛰️", "color": "#457b9d", "stock_count": 16, "avg_chg_1d": -0.05, "avg_chg_5d": 2.24, "wow": -32.3, "r5d_dollar": 35648671842}, {"key": "sat_comms", "name": "卫星通信/互联网", "icon": "📡", "color": "#2a9d8f", "stock_count": 12, "avg_chg_1d": 1.89, "avg_chg_5d": 8.31, "wow": -15.5, "r5d_dollar": 28298542027}, {"key": "defense_prime", "name": "军工国防主承包商", "icon": "🛡️", "color": "#343a40", "stock_count": 19, "avg_chg_1d": -0.51, "avg_chg_5d": 1.1, "wow": -25.5, "r5d_dollar": 28920225343}, {"key": "defense_tech", "name": "国防科技·无人机·高超音速", "icon": "🎯", "color": "#6c757d", "stock_count": 13, "avg_chg_1d": -0.21, "avg_chg_5d": 0.8, "wow": -27.4, "r5d_dollar": 29116603001}, {"key": "aviation_mfg", "name": "航空制造", "icon": "✈️", "color": "#495057", "stock_count": 15, "avg_chg_1d": -0.73, "avg_chg_5d": 0.15, "wow": -24.9, "r5d_dollar": 32768631365}, {"key": "sat_data", "name": "卫星数据/遥感", "icon": "🌍", "color": "#e9c46a", "stock_count": 10, "avg_chg_1d": 1.36, "avg_chg_5d": 2.81, "wow": -41.6, "r5d_dollar": 10252089568}, {"key": "ground_systems", "name": "地面系统/GPS", "icon": "📻", "color": "#f4a261", "stock_count": 9, "avg_chg_1d": -0.71, "avg_chg_5d": 0.48, "wow": -20.7, "r5d_dollar": 6192829420}, {"key": "propulsion_parts", "name": "推进/材料/精密零件", "icon": "🔥", "color": "#e76f51", "stock_count": 15, "avg_chg_1d": -0.47, "avg_chg_5d": 0.67, "wow": -21.4, "r5d_dollar": 26049650341}, {"key": "space_services", "name": "航天服务/承包商", "icon": "🏢", "color": "#adb5bd", "stock_count": 13, "avg_chg_1d": 0.38, "avg_chg_5d": 2.48, "wow": -27.9, "r5d_dollar": 26374959318}]}, "robot": {"name": "机器人产业链", "icon": "🦾", "color": "#7209b7", "output": "robot.html", "stock_count": 50, "sector_count": 7, "total_r5d_dollar": 540482940299, "total_r22d_dollar": 2105038580330, "top10_gainers_1d": [["NICE", 10.66], ["APPN", 8.42], ["EH", 4.0], ["PATH", 3.59], ["CDNS", 3.44], ["NOW", 3.23], ["DXCM", 3.02], ["TSLA", 2.41], ["ACHR", 2.26], ["MSFT", 1.63]], "top10_losers_1d": [["SYK", -6.47], ["AVAV", -5.15], ["RCAT", -4.18], ["RMD", -4.11], ["COHU", -3.72], ["PH", -2.99], ["FANUY", -2.35], ["AME", -2.13], ["EMR", -2.13], ["OUST", -1.89]], "top10_gainers_5d": [["NICE", 12.5, 258948309], ["GOOGL", 12.0, 71444223154], ["JOBY", 8.8, 1651212910], ["TSLA", 3.9, 106293836594], ["CGNX", 3.1, 524179981], ["ACHR", 3.0, 713437606], ["PATH", 2.9, 1280155402], ["FANUY", 2.8, 81489820], ["CDNS", 2.4, 5227471163], ["APPN", 1.8, 127203470]], "money_top10": [["NVDA", 175263102751, -4.7], ["TSLA", 106293836594, 3.9], ["MSFT", 84330334405, -2.4], ["GOOGL", 71444223154, 12.0], ["TER", 11054625174, -17.4], ["NOW", 10563189107, 1.1], ["JNJ", 8456906150, -0.1], ["IBM", 6787361755, 0.1], ["CDNS", 5227471163, 2.4], ["UBER", 5041705606, 0.6]], "anomalies": [["RMD", 2.74, -4.11], ["COHU", 2.57, -3.72], ["PH", 2.47, -2.99], ["DXCM", 2.33, 3.02], ["SYK", 2.24, -6.47]], "sectors_brief": [{"key": "humanoid", "name": "人形/AI机器人平台", "icon": "🤖", "color": "#7209b7", "stock_count": 8, "avg_chg_1d": 0.78, "avg_chg_5d": 0.95, "wow": 6.6, "r5d_dollar": 294623187155}, {"key": "medical_robot", "name": "医疗机器人", "icon": "🏥", "color": "#f72585", "stock_count": 8, "avg_chg_1d": -1.14, "avg_chg_5d": -4.33, "wow": -0.9, "r5d_dollar": 25790851966}, {"key": "industrial_auto", "name": "工业自动化", "icon": "🏭", "color": "#4361ee", "stock_count": 14, "avg_chg_1d": -0.87, "avg_chg_5d": -3.28, "wow": 43.7, "r5d_dollar": 32735800997}, {"key": "autonomous_vehicle", "name": "自动驾驶/AGV", "icon": "🚗", "color": "#3a86ff", "stock_count": 7, "avg_chg_1d": 0.08, "avg_chg_5d": -0.13, "wow": 8.7, "r5d_dollar": 187203984351}, {"key": "drone_uav", "name": "无人机/UAV", "icon": "🛸", "color": "#fb5607", "stock_count": 6, "avg_chg_1d": -0.67, "avg_chg_5d": 0.32, "wow": -12.5, "r5d_dollar": 4651291118}, {"key": "robot_sensors", "name": "传感器/视觉/精密运动", "icon": "👁️", "color": "#8338ec", "stock_count": 7, "avg_chg_1d": -0.5, "avg_chg_5d": -0.8, "wow": 3.3, "r5d_dollar": 7566839104}, {"key": "software_auto", "name": "软件自动化/RPA", "icon": "💻", "color": "#06d6a0", "stock_count": 7, "avg_chg_1d": 3.87, "avg_chg_5d": 1.86, "wow": 4.0, "r5d_dollar": 103749920866}]}, "energy": {"name": "能源产业链", "icon": "⚡", "color": "#e9c46a", "output": "energy.html", "stock_count": 79, "sector_count": 8, "total_r5d_dollar": 180363879810, "total_r22d_dollar": 717709881298, "top10_gainers_1d": [["NVT", 11.21], ["CSIQ", 9.42], ["FLUX", 7.38], ["MYRG", 7.08], ["FSLR", 4.86], ["JKS", 3.25], ["SHLS", 2.77], ["ENPH", 2.7], ["MVST", 2.59], ["RUN", 2.59]], "top10_losers_1d": [["NRGV", -4.99], ["VWDRY", -3.32], ["OXY", -3.09], ["OKLO", -2.9], ["SMR", -2.57], ["VLO", -2.26], ["DNN", -2.09], ["COP", -2.06], ["LEU", -2.05], ["CCJ", -1.98]], "top10_gainers_5d": [["MYRG", 27.8, 690849792], ["BE", 25.7, 17569736999], ["FCEL", 19.1, 646563701], ["PWR", 18.8, 5054917118], ["CSIQ", 18.5, 243174395], ["NVT", 11.8, 2014912956], ["MPC", 9.8, 2563455158], ["FSLR", 9.3, 2774565529], ["POWL", 8.9, 903245697], ["JKS", 6.7, 63810902]], "money_top10": [["GEV", 18678345142, -7.5], ["BE", 17569736999, 25.7], ["XOM", 12511766587, 2.6], ["CVX", 9949504572, 2.9], ["COP", 6089314654, 1.2], ["LIN", 5863705331, -0.5], ["OKLO", 5309821059, -0.8], ["ETN", 5308264731, 0.4], ["PWR", 5054917118, 18.8], ["NEE", 4699233395, 1.8]], "anomalies": [["NVT", 2.37, 11.21], ["FSLR", 2.36, 4.86], ["AES", 2.0, 0.07]], "sectors_brief": [{"key": "solar", "name": "太阳能", "icon": "☀️", "color": "#f77f00", "stock_count": 11, "avg_chg_1d": 2.48, "avg_chg_5d": -3.83, "wow": 15.7, "r5d_dollar": 7058957128}, {"key": "wind", "name": "风能", "icon": "💨", "color": "#52b788", "stock_count": 9, "avg_chg_1d": -0.67, "avg_chg_5d": -1.44, "wow": 9.5, "r5d_dollar": 24714291373}, {"key": "nuclear", "name": "核能/铀矿", "icon": "☢️", "color": "#3a86ff", "stock_count": 13, "avg_chg_1d": -1.11, "avg_chg_5d": 0.18, "wow": -12.1, "r5d_dollar": 23465350888}, {"key": "hydrogen", "name": "氢能/燃料电池", "icon": "💧", "color": "#00b4d8", "stock_count": 7, "avg_chg_1d": 1.0, "avg_chg_5d": 6.96, "wow": 60.4, "r5d_dollar": 27129820465}, {"key": "storage", "name": "储能/电池", "icon": "🔋", "color": "#4cc9f0", "stock_count": 7, "avg_chg_1d": 0.96, "avg_chg_5d": -0.43, "wow": -39.3, "r5d_dollar": 1403334732}, {"key": "grid", "name": "电网/输配电", "icon": "🔌", "color": "#e76f51", "stock_count": 9, "avg_chg_1d": 1.93, "avg_chg_5d": 6.2, "wow": 26.7, "r5d_dollar": 37668351401}, {"key": "utilities", "name": "电力公用事业", "icon": "🏭", "color": "#6c757d", "stock_count": 12, "avg_chg_1d": -0.43, "avg_chg_5d": 1.98, "wow": 15.6, "r5d_dollar": 22885855550}, {"key": "oil_gas", "name": "油气/LNG", "icon": "🛢️", "color": "#343a40", "stock_count": 15, "avg_chg_1d": -1.23, "avg_chg_5d": 3.84, "wow": 9.5, "r5d_dollar": 62431601444}]}}};
+function fmtM(n){if(!n)return'$0';if(n>=1e12)return'$'+(n/1e12).toFixed(2)+'T';if(n>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n;}
+function fmtP(p,d=1){if(p===null||p===undefined)return'—';return(p>=0?'+':'')+p.toFixed(d)+'%';}
+
+if(typeof PORTAL_DATA==='undefined'){
+  document.getElementById('cardsArea').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:#555;">请先运行 run.sh 生成数据</div>';
+} else {
+  const P=PORTAL_DATA;
+  document.getElementById('updTime').textContent=P.updated_at;
+  document.getElementById('updSub').textContent='数据源: Yahoo Finance · 最近更新: '+P.updated_at;
+
+  // Ticker
+  const allTickers=[];
+  Object.values(P.industries).forEach(ind=>{
+    (ind.top10_gainers_1d||[]).slice(0,3).forEach(([t,c])=>allTickers.push({l:ind.icon+t,v:fmtP(c),up:c>=0}));
+    (ind.anomalies||[]).slice(0,2).forEach(([t,r,c])=>allTickers.push({l:'⚡'+t+' '+r+'x',v:fmtP(c),up:c>=0}));
+  });
+  const doubled=[...allTickers,...allTickers];
+  const ti=document.getElementById('tickerInner');
+  doubled.forEach(it=>{ const el=document.createElement('span'); el.className='ticker-item'; el.innerHTML=it.l+' <span class="'+(it.up?'t-up':'t-dn')+'">'+it.v+'</span>'; ti.appendChild(el); });
+
+  // 行业卡片
+  const cards=document.getElementById('cardsArea');
+  const indKeys=Object.keys(P.industries);
+  const totalAll=indKeys.reduce((s,k)=>s+(P.industries[k].total_r5d_dollar||0),0);
+  indKeys.forEach(k=>{
+    const ind=P.industries[k];
+    const a=document.createElement('a'); a.className='card'; a.href=ind.output; a.style.borderLeftColor=ind.color;
+    const g0=ind.top10_gainers_1d&&ind.top10_gainers_1d[0]?ind.top10_gainers_1d[0]:['—',0];
+    const l0=ind.top10_losers_1d&&ind.top10_losers_1d[0]?ind.top10_losers_1d[0]:['—',0];
+    a.innerHTML=`<div class="c-top"><span class="c-ic">${ind.icon}</span><div><div class="c-nm">${ind.name}</div><div class="c-st">${ind.sector_count}板块·${ind.stock_count}只</div></div></div>
+<div class="c-money">${fmtM(ind.total_r5d_dollar)}</div><div class="c-lbl">5日总成交额</div>
+<div class="c-stats"><div>22日: <b>${fmtM(ind.total_r22d_dollar)}</b></div><div>领涨: <b style="color:#4ade80">${g0[0]} ${fmtP(g0[1])}</b></div><div>领跌: <b style="color:#f87171">${l0[0]} ${fmtP(l0[1])}</b></div></div>`;
+    cards.appendChild(a);
+  });
+
+  // 饼图
+  new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:indKeys.map(k=>P.industries[k].icon+' '+P.industries[k].name),datasets:[{data:indKeys.map(k=>P.industries[k].total_r5d_dollar),backgroundColor:indKeys.map(k=>P.industries[k].color),borderColor:'#0f0e0c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:9},padding:8}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fmtM(c.parsed)} (${(c.parsed/totalAll*100).toFixed(1)}%)`}}}}});
+  // 行业统计列表
+  const is=document.getElementById('indStats');
+  indKeys.forEach(k=>{
+    const ind=P.industries[k];
+    const pct=totalAll>0?(ind.total_r5d_dollar/totalAll*100).toFixed(1):'0';
+    const d=document.createElement('div'); d.className='ind-stat'; d.style.borderLeftColor=ind.color;
+    // TOP10 资金活跃股票
+    const top10 = ind.money_top10 || [];
+    let topHtml = '';
+    if (top10.length > 0) {
+      topHtml = '<div class="ind-top10"><div class="ind-top-h">💰 资金活跃 TOP10</div>';
+      top10.forEach(([t, m, c], i) => {
+        const cls = c >= 0 ? 'h-up' : 'h-dn';
+        topHtml += `<div class="ind-top-row">
+          <span class="rk">${i+1}</span>
+          <a class="tk" href="${ind.output}#${t}">${t}</a>
+          <span class="am">${fmtM(m)}</span>
+          <span class="pc ${cls}">${fmtP(c)}</span>
+        </div>`;
+      });
+      topHtml += '</div>';
+    }
+    d.innerHTML=`<div class="nm">${ind.icon} ${ind.name} <span style="font-size:10px;color:#888;">${pct}%</span></div><div class="amt">${fmtM(ind.total_r5d_dollar)}</div><div class="sub">${ind.stock_count}只·${ind.sector_count}板块</div>${topHtml}`;
+    is.appendChild(d);
+  });
+
+  // 板块热度
+  const allSecs=[];
+  indKeys.forEach(k=>{ (P.industries[k].sectors_brief||[]).forEach(s=>allSecs.push({...s,indIcon:P.industries[k].icon})); });
+  allSecs.sort((a,b)=>(b.r5d_dollar||0)-(a.r5d_dollar||0));
+  const hg=document.getElementById('heatGrid');
+  allSecs.slice(0,12).forEach(s=>{
+    const wow=s.wow; const c1=s.avg_chg_1d;
+    const el=document.createElement('div'); el.className='heat-item'; el.style.borderLeftColor=s.color;
+    el.innerHTML=`<div class="heat-nm">${s.icon||s.indIcon} ${s.name}</div><div class="heat-amt">${fmtM(s.r5d_dollar||0)}</div><div class="heat-sub ${wow===null?'h-neu':(wow>=0?'h-up':'h-dn')}">环比${fmtP(wow)} 今日${fmtP(c1)}</div>`;
+    hg.appendChild(el);
+  });
+
+  // 跨行业排行
+  function mkCross(id,items,type){
+    const el=document.getElementById(id); el.innerHTML='';
+    (items||[]).slice(0,10).forEach((item,i)=>{
+      const row=document.createElement('div'); row.className='cross-item';
+      if(type==='anomaly'){
+        const [t,r,c,indName]=item;
+        row.innerHTML=`<span class="c-rank">${i+1}</span><span class="c-tkr">${t}</span><span class="c-ind">${indName||''}</span><span class="c-pct ${c>=0?'h-up':'h-dn'}">${r}x</span>`;
+      } else if(type==='money'){
+        const [t,m,c,indName]=item;
+        row.innerHTML=`<span class="c-rank">${i+1}</span><span class="c-tkr">${t}</span><span class="c-ind">${fmtM(m)}</span><span class="c-pct ${c>=0?'h-up':'h-dn'}">${fmtP(c)}</span>`;
+      } else {
+        const [t,c,indName]=item;
+        row.innerHTML=`<span class="c-rank">${i+1}</span><span class="c-tkr">${t}</span><span class="c-ind">${indName||''}</span><span class="c-pct ${c>=0?'h-up':'h-dn'}">${fmtP(c)}</span>`;
+      }
+      el.appendChild(row);
+    });
+  }
+  const allG1=[],allL1=[],allM=[],allA=[];
+  indKeys.forEach(k=>{
+    const ind=P.industries[k];
+    (ind.top10_gainers_1d||[]).forEach(([t,c])=>allG1.push([t,c,ind.name]));
+    (ind.top10_losers_1d||[]).forEach(([t,c])=>allL1.push([t,c,ind.name]));
+    (ind.money_top10||[]).forEach(([t,m,c])=>allM.push([t,m,c,ind.name]));
+    (ind.anomalies||[]).forEach(([t,r,c])=>allA.push([t,r,c,ind.name]));
+  });
+  allG1.sort((a,b)=>b[1]-a[1]); allL1.sort((a,b)=>a[1]-b[1]);
+  allM.sort((a,b)=>b[1]-a[1]); allA.sort((a,b)=>b[1]-a[1]);
+  mkCross('cross1dGain',allG1,'pct'); mkCross('cross1dLoss',allL1,'pct');
+  mkCross('crossMoney',allM,'money'); mkCross('crossAnomaly',allA,'anomaly');
+}
+</script>
+</body>
+</html>
