@@ -1,0 +1,12 @@
+__pycache__/
+venv/
+.env
+*.env
+.DS_Store
+*.pyc
+.cache/
+node_modules/
+token*
+cookies*
+*.key
+*.pem
